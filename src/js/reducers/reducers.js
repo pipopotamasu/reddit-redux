@@ -13,11 +13,11 @@ const selectedSubreddit = (state = 'reactjs', action) => {
   }
 }
 
-const posts => (state = {
+const posts = (state = {
   isFetching : false,
   didInvalidate: false,
   items: []
-}, action) {
+}, action) => {
   switch (action.type) {
     case INVALIDATE_SUBREDDIT:
       return Object.assign({}, state, {
@@ -43,7 +43,7 @@ const posts => (state = {
   }
 }
 
-const postsBySubreddit(state = { }, action) {
+const postsBySubreddit = (state = { }, action) => {
   switch (action.type) {
     case INVALIDATE_SUBREDDIT:
     case REQUEST_POSTS:
@@ -57,7 +57,7 @@ const postsBySubreddit(state = { }, action) {
   }
 }
 
-const rootReducer = conbineReducers({
+const rootReducer = combineReducers({
   postsBySubreddit,
   selectedSubreddit
 })

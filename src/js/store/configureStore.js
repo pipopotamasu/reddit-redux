@@ -8,7 +8,7 @@ import rootReducer from '../reducers/reducers'
 
 const loggerMiddleware = createLogger()
 
-export default const configureStore(preloadedState) {
+const configureStore = (preloadedState) => {
   return createStore(
     rootReducer,
     preloadedState,
@@ -18,3 +18,5 @@ export default const configureStore(preloadedState) {
     )
   )
 }
+
+export default configureStore
