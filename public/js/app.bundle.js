@@ -25017,7 +25017,7 @@
 	    subreddit: subreddit,
 	    posts: json.data.children.map(function (child) {
 	      return child.data;
-	    }),
+	    }), // fetchで取って来た記事データを配列に格納している
 	    receivedAt: Date.now()
 	  };
 	};
@@ -25025,10 +25025,14 @@
 	// thunk用の実装。非同期処理を行う時は、返り値でactionが返せないため、dispatch関数を引数とする関数を返しておけば、thunkがdispatchを引数にセットしてその関数を実行してくれる
 	var fetchPosts = exports.fetchPosts = function fetchPosts(subreddit) {
 	  return function (dispatch) {
+	    // storeにリクエスト開始という状態を保存する
 	    dispatch(requestPosts(subreddit));
-	    return (0, _isomorphicFetch2.default)('https://www.reddit.com/r/' + subreddit + '.json').then(function (response) {
+	    // このfetchはthunkが実行してくれる(実行タイミングはactionのdispatch中もしくはactionがreducerに渡されるタイミング)
+	    return (0, _isomorphicFetch2.default)('https://www.reddit.com/r/' + subreddit + '.json') // fetch apiにより、完了後にpromiseがかえされるっぽい。es6のpromiseの仕様 https://developer.mozilla.org/ja/docs/Web/API/Fetch_API
+	    .then(function (response) {
 	      return response.json();
-	    }).then(function (json) {
+	    }) // .json()も同様にpromise返す
+	    .then(function (json) {
 	      return dispatch(receivePosts(subreddit, json));
 	    });
 	  };
@@ -25048,7 +25052,9 @@
 	// thunk用の実装。thunkに渡す関数にはdispatchだけでなく、第２引数としてgetStateを渡すことができる
 	// 非同期処理だけでなく、stateの値をつかってactionを生成したい場合にも使える
 	var fetchPostsIfNeeded = exports.fetchPostsIfNeeded = function fetchPostsIfNeeded(subreddit) {
+	  // thunkで非同期処理を実行させるため、dispatchを引数にしたコールバック関数を返す
 	  return function (dispatch, getState) {
+	    // stateであるpostsが空な場合や、記事の無効化が完了した場合にPOSTリクエストで記事を取ってくる
 	    if (shouldFetchPosts(getState(), subreddit)) {
 	      return dispatch(fetchPosts(subreddit));
 	    }
@@ -25599,6 +25605,7 @@
 	          dispatch = _props.dispatch,
 	          selectedSubreddit = _props.selectedSubreddit; // selectedSubredditはpreloadedState?
 	
+	      console.log('did mount');
 	      dispatch((0, _actions.fetchPostsIfNeeded)(selectedSubreddit));
 	    }
 	
@@ -25617,8 +25624,10 @@
 	  }, {
 	    key: 'handleChange',
 	    value: function handleChange(nextSubreddit) {
-	      this.props.dispatch((0, _actions.selectSubreddit)(nextSubreddit));
-	      this.props.dispatch((0, _actions.fetchPostsIfNeeded)(nextSubreddit));
+	      var dispatch = this.props.dispatch;
+	
+	      dispatch((0, _actions.selectSubreddit)(nextSubreddit));
+	      dispatch((0, _actions.fetchPostsIfNeeded)(nextSubreddit));
 	    }
 	  }, {
 	    key: 'handleRefreshClick',
@@ -25731,75 +25740,69 @@
 	  value: true
 	});
 	
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-	
 	var _react = __webpack_require__(/*! react */ 1);
 	
 	var _react2 = _interopRequireDefault(_react);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	// export default class Picker extends Component {
+	//   render() {
+	//     const { value, onChange, options } = this.props
+	//
+	//     return (
+	//       <span>
+	//         <h1>{value}</h1>
+	//         <select onChange={e => onChange(e.target.value) }
+	//                 value={value}>
+	//             {options.map(option =>
+	//                 <option value={option} key={option}>
+	//                   {option}
+	//                 </option>
+	//             )}
+	//         </select>
+	//       </span>
+	//     )
+	//   }
+	// }
 	
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	var Picker = function Picker(_ref) {
+	  var value = _ref.value,
+	      _onChange = _ref.onChange,
+	      options = _ref.options;
 	
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-	
-	var Picker = function (_Component) {
-	  _inherits(Picker, _Component);
-	
-	  function Picker() {
-	    _classCallCheck(this, Picker);
-	
-	    return _possibleConstructorReturn(this, (Picker.__proto__ || Object.getPrototypeOf(Picker)).apply(this, arguments));
-	  }
-	
-	  _createClass(Picker, [{
-	    key: 'render',
-	    value: function render() {
-	      var _props = this.props,
-	          value = _props.value,
-	          _onChange = _props.onChange,
-	          options = _props.options;
-	
-	
-	      return _react2.default.createElement(
-	        'span',
-	        null,
-	        _react2.default.createElement(
-	          'h1',
-	          null,
-	          value
-	        ),
-	        _react2.default.createElement(
-	          'select',
-	          { onChange: function onChange(e) {
-	              return _onChange(e.target.value);
-	            },
-	            value: value },
-	          options.map(function (option) {
-	            return _react2.default.createElement(
-	              'option',
-	              { value: option, key: option },
-	              option
-	            );
-	          })
-	        )
-	      );
-	    }
-	  }]);
-	
-	  return Picker;
-	}(_react.Component);
-	
-	exports.default = Picker;
-	
+	  return _react2.default.createElement(
+	    'span',
+	    null,
+	    _react2.default.createElement(
+	      'h1',
+	      null,
+	      value
+	    ),
+	    _react2.default.createElement(
+	      'select',
+	      { onChange: function onChange(e) {
+	          return _onChange(e.target.value);
+	        },
+	        value: value },
+	      options.map(function (option) {
+	        return _react2.default.createElement(
+	          'option',
+	          { value: option, key: option },
+	          option
+	        );
+	      })
+	    )
+	  );
+	};
 	
 	Picker.propTypes = {
 	  options: _react.PropTypes.arrayOf(_react.PropTypes.string.isRequired).isRequired,
 	  value: _react.PropTypes.string.isRequired,
 	  onChange: _react.PropTypes.func.isRequired
 	};
+	
+	exports.default = Picker;
 
 /***/ },
 /* 223 */
@@ -25814,55 +25817,45 @@
 	  value: true
 	});
 	
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-	
 	var _react = __webpack_require__(/*! react */ 1);
 	
 	var _react2 = _interopRequireDefault(_react);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	// export default class Posts extends Component {
+	//   render() {
+	//     return (
+	//       <ul>
+	//         {this.props.posts.map((post, i) =>
+	//           <li key={i}>{post.title}</li>
+	//         )}
+	//       </ul>
+	//     )
+	//   }
+	// }
 	
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	var Posts = function Posts(_ref) {
+	  var posts = _ref.posts;
 	
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-	
-	var Posts = function (_Component) {
-	  _inherits(Posts, _Component);
-	
-	  function Posts() {
-	    _classCallCheck(this, Posts);
-	
-	    return _possibleConstructorReturn(this, (Posts.__proto__ || Object.getPrototypeOf(Posts)).apply(this, arguments));
-	  }
-	
-	  _createClass(Posts, [{
-	    key: 'render',
-	    value: function render() {
+	  return _react2.default.createElement(
+	    'ul',
+	    null,
+	    posts.map(function (post, i) {
 	      return _react2.default.createElement(
-	        'ul',
-	        null,
-	        this.props.posts.map(function (post, i) {
-	          return _react2.default.createElement(
-	            'li',
-	            { key: i },
-	            post.title
-	          );
-	        })
+	        'li',
+	        { key: i },
+	        post.title
 	      );
-	    }
-	  }]);
-	
-	  return Posts;
-	}(_react.Component);
-	
-	exports.default = Posts;
-	
+	    })
+	  );
+	};
 	
 	Posts.propTypes = {
 	  posts: _react.PropTypes.array.isRequired
 	};
+	
+	exports.default = Posts;
 
 /***/ }
 /******/ ]);

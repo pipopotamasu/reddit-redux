@@ -14,6 +14,7 @@ class AsyncApp extends Component {
   // 描画が完了した時に呼ばれる
   componentDidMount() {
     const { dispatch, selectedSubreddit } = this.props // selectedSubredditはpreloadedState?
+    console.log('did mount')
     dispatch(fetchPostsIfNeeded(selectedSubreddit))
    }
 
@@ -26,8 +27,9 @@ class AsyncApp extends Component {
    }
 
    handleChange(nextSubreddit) {
-     this.props.dispatch(selectSubreddit(nextSubreddit))
-     this.props.dispatch(fetchPostsIfNeeded(nextSubreddit))
+     const { dispatch } = this.props
+     dispatch(selectSubreddit(nextSubreddit))
+     dispatch(fetchPostsIfNeeded(nextSubreddit))
    }
 
    handleRefreshClick(e) {
