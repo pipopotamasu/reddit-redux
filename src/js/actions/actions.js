@@ -26,12 +26,12 @@ export const requestPosts = (subreddit) => {
   }
 }
 
-export const receivePosts = (subreddit, json) => {
+export const receivePosts = (subreddit, json, dataNow = Date.now()) => {
   return {
     type: RECEIVE_POSTS,
     subreddit,
     posts: json.data.children.map(child => child.data), // fetchで取って来た記事データを配列に格納している
-    receivedAt: Date.now()
+    receivedAt: dataNow
   }
 }
 

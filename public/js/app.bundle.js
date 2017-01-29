@@ -25012,13 +25012,16 @@
 	};
 	
 	var receivePosts = exports.receivePosts = function receivePosts(subreddit, json) {
+	  var dataNow = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : Date.now();
+	
+	  console.log(json);
 	  return {
 	    type: RECEIVE_POSTS,
 	    subreddit: subreddit,
 	    posts: json.data.children.map(function (child) {
 	      return child.data;
 	    }), // fetchで取って来た記事データを配列に格納している
-	    receivedAt: Date.now()
+	    receivedAt: dataNow
 	  };
 	};
 	
