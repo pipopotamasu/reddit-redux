@@ -18,8 +18,9 @@ module.exports = function(config) {
     // テスト対象ファイルとテストファイルを指定する
     files: [
       './node_modules/phantomjs-polyfill-object-assign/object-assign-polyfill.js',
+      './node_modules/babel-polyfill/dist/polyfill.js', // fetch-Mock使うのにいるっぽい
       'tests/*_test.js',
-    	'tests/**/*_test.js'
+      'tests/**/*_test.js'
     ],
 
 

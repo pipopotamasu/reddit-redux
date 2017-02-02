@@ -8,6 +8,7 @@ import { selectSubreddit,
        } from '../../../src/js/actions/actions'
 import configureMockStore from 'redux-mock-store';
 import thunk from 'redux-thunk';
+import fetchMock from 'fetch-mock'; // fetchAPIをMockしてくれるライブラリ
 
 
 describe('test action creater', () => {
@@ -29,7 +30,7 @@ describe('test action creater', () => {
     assert.deepStrictEqual(requestPosts(subreddit), expectedAction)
   })
 
-  it('test selectSubreddit', () => {
+  it('test receivePosts', () => {
     const subreddit = 'test'
     const json = {
       data : {
@@ -47,20 +48,26 @@ describe('test action creater', () => {
   })
 
   it('test fetchPosts', (done) => {
+    const subreddit = 'test'
+
     const middlewares = [ thunk ]
     const mockStore = configureMockStore(middlewares)
-    const initialState = {
-      items: [],
-      isFetching: false,
-    }
-    const subreddit = 'test'
+
     const expectedActions = [
       { type: 'REQUEST_POSTS', subreddit },
       { type: 'RECEIVE_POSTS', items: ['items'] },
     ]
-
-    const store = mockStore({})
-    return store.dispatch(fetchPosts(subreddit))
-      .then(() => {})
-  })
+    const response = {
+      json : {
+        data : 'hoge'
+      }
+    }
+    fetchMock.getOnce('*', response);
+    const store = mockStore({}, expectedActions, done)
+    store.dispatch(fetchPosts(subreddit)).then(() => {
+        const dispatchedActions = store.getActions()
+        assert.deepEqual(dispatchedActions[0], expectedActions[0])
+      })
+    done()
+    })
 })
