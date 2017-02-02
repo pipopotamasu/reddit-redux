@@ -65,6 +65,7 @@ describe('test action creater', () => {
     fetchMock.getOnce('*', response);
     const store = mockStore({}, expectedActions, done)
     store.dispatch(fetchPosts(subreddit)).then(() => {
+      // なぜかここに入らない
         const dispatchedActions = store.getActions()
         assert.deepEqual(dispatchedActions[0], expectedActions[0])
       })
